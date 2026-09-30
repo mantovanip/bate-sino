@@ -37,84 +37,70 @@ p{margin:0 0 38px;color:#ad9b79;font-size:15px}
 </main>
 <script>
 let audio=null;
-let audioReady=false;
 
 function makeBellWav(){
-  const sr=44100, duration=3;
-  const n=sr*duration;
-  const buffer=new ArrayBuffer(44+n*2);
-  const view=new DataView(buffer);
+  const sr=44100, duration=3.8, n=Math.floor(sr*duration);
+  const buffer=new ArrayBuffer(44+n*2), view=new DataView(buffer);
   const write=(o,s)=>{for(let i=0;i<s.length;i++)view.setUint8(o+i,s.charCodeAt(i));};
-  write(0,"RIFF");
-  view.setUint32(4,36+n*2,true);
-  write(8,"WAVE");
-  write(12,"fmt ");
-  view.setUint32(16,16,true);
-  view.setUint16(20,1,true);
-  view.setUint16(22,1,true);
-  view.setUint32(24,sr,true);
-  view.setUint32(28,sr*2,true);
-  view.setUint16(32,2,true);
-  view.setUint16(34,16,true);
-  write(36,"data");
+  write(0,"RIFF"); view.setUint32(4,36+n*2,true); write(8,"WAVE");
+  write(12,"fmt "); view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,1,true); view.setUint32(24,sr,true); view.setUint32(28,sr*2,true);
+  view.setUint16(32,2,true); view.setUint16(34,16,true); write(36,"data");
   view.setUint32(40,n*2,true);
 
-  const p=[
-    [196,1,3.0],[393,.62,2.6],[588,.42,2.25],
-    [785,.28,2.0],[1037,.22,1.75],[1375,.15,1.55],
-    [1760,.10,1.35],[2310,.06,1.1],[2940,.04,.9]
+  const hits=[0,.72,1.44];
+  const partials=[
+    [205,1,2.7],[410,.62,2.25],[615,.42,2.0],[820,.28,1.8],
+    [1080,.20,1.55],[1430,.13,1.35],[1810,.09,1.15],[2350,.055,.95],[2920,.035,.75]
   ];
-
-  let peak=0;
   const samples=new Float32Array(n);
+  let peak=0;
+
   for(let i=0;i<n;i++){
     const t=i/sr;
-    let s=0;
-    for(const [f,a,d] of p)s+=a*Math.exp(-t*d)*Math.sin(2*Math.PI*f*t);
-    s+=.12*Math.exp(-t*35)*Math.sin(2*Math.PI*3200*t);
-    s+=.10*Math.exp(-t*8)*Math.sin(2*Math.PI*110*t);
-    samples[i]=s;
-    if(Math.abs(s)>peak)peak=Math.abs(s);
+    let x=0;
+    for(const hit of hits){
+      const q=t-hit;
+      if(q<0)continue;
+      for(const [f,a,d] of partials){
+        x+=a*Math.exp(-q*d*2.1)*Math.sin(2*Math.PI*f*q);
+      }
+      x+=.16*Math.exp(-q*32)*Math.sin(2*Math.PI*3300*q);
+      x+=.10*Math.exp(-q*13)*Math.sin(2*Math.PI*125*q);
+    }
+    samples[i]=x;
+    peak=Math.max(peak,Math.abs(x));
   }
+
   for(let i=0;i<n;i++){
-    let s=samples[i]/peak*.9;
-    s=Math.max(-1,Math.min(1,s));
-    view.setInt16(44+i*2,s*32767,true);
+    let x=samples[i]/peak*.88;
+    x=Math.max(-1,Math.min(1,x));
+    view.setInt16(44+i*2,x*32767,true);
   }
   return new Blob([buffer],{type:"audio/wav"});
 }
 
-function prepareAudio(){
-  if(audioReady)return;
-  const blob=makeBellWav();
-  audio=new Audio(URL.createObjectURL(blob));
-  audio.preload="auto";
-  audio.setAttribute("playsinline","");
-  audioReady=true;
-}
-
-async function ring(){
-  prepareAudio();
+function ring(){
+  if(!audio){
+    audio=new Audio(URL.createObjectURL(makeBellWav()));
+    audio.preload="auto";
+    audio.setAttribute("playsinline","");
+  }
   audio.pause();
   audio.currentTime=0;
-  try{
-    await audio.play();
-  }catch(e){
-    console.warn("Falha ao reproduzir o sino",e);
-  }
+  const p=audio.play();
+  if(p)p.catch(err=>console.warn("Áudio bloqueado",err));
 }
 
 const b=document.getElementById("bellButton");
-
-b.addEventListener("pointerdown",async(e)=>{
+b.addEventListener("pointerdown",e=>{
   e.preventDefault();
   b.classList.remove("active");
   void b.offsetWidth;
   b.classList.add("active");
-  if(navigator.vibrate)navigator.vibrate([25,15,35]);
-  await ring();
+  if(navigator.vibrate)navigator.vibrate([25,15,35,120,15,35,120,15,35]);
+  ring();
 },{passive:false});
-
 b.addEventListener("animationend",()=>b.classList.remove("active"));
 </script>
 </body>
