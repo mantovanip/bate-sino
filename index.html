@@ -37,37 +37,81 @@ p{margin:0 0 38px;color:#ad9b79;font-size:15px}
 </main>
 <script>
 let ctx=null;
-function ring(){
+let unlocking=false;
+
+async function getAudio(){
   const AC=window.AudioContext||window.webkitAudioContext;
-  if(!AC)return;
+  if(!AC)return null;
   if(!ctx)ctx=new AC();
-  if(ctx.state==="suspended")ctx.resume();
-  const now=ctx.currentTime;
-  const master=ctx.createGain();
-  master.gain.setValueAtTime(.9,now);
-  master.gain.exponentialRampToValueAtTime(.0001,now+2.8);
-  master.connect(ctx.destination);
-  const partials=[[235,.55],[470,.32],[705,.22],[1030,.16],[1410,.12],[1870,.08]];
-  partials.forEach(([f,v],i)=>{
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    o.type=i<2?"sine":"triangle";
-    o.frequency.setValueAtTime(f,now);
-    o.frequency.exponentialRampToValueAtTime(f*.985,now+1.8);
-    g.gain.setValueAtTime(v,now);
-    g.gain.exponentialRampToValueAtTime(.0001,now+1.7+i*.18);
-    o.connect(g);g.connect(master);o.start(now);o.stop(now+3);
-  });
-  const noise=ctx.createOscillator(),ng=ctx.createGain();
-  noise.type="triangle";noise.frequency.setValueAtTime(3100,now);
-  ng.gain.setValueAtTime(.07,now);ng.gain.exponentialRampToValueAtTime(.0001,now+.35);
-  noise.connect(ng);ng.connect(master);noise.start(now);noise.stop(now+.4);
+  if(ctx.state==="suspended")await ctx.resume();
+  return ctx;
 }
+
+async function ring(){
+  const c=await getAudio();
+  if(!c)return;
+  const now=c.currentTime;
+
+  const master=c.createGain();
+  master.gain.setValueAtTime(.85,now);
+  master.gain.exponentialRampToValueAtTime(.0001,now+3.2);
+  master.connect(c.destination);
+
+  const partials=[
+    [196,.38,3.0],
+    [392,.28,2.7],
+    [588,.20,2.4],
+    [784,.15,2.2],
+    [1035,.12,1.9],
+    [1375,.09,1.7],
+    [1760,.06,1.45]
+  ];
+
+  partials.forEach(([f,v,d],i)=>{
+    const o=c.createOscillator();
+    const g=c.createGain();
+    o.type=i<4?"sine":"triangle";
+    o.frequency.setValueAtTime(f,now);
+    o.frequency.exponentialRampToValueAtTime(f*.985,now+d);
+    g.gain.setValueAtTime(.0001,now);
+    g.gain.linearRampToValueAtTime(v,now+.012);
+    g.gain.exponentialRampToValueAtTime(.0001,now+d);
+    o.connect(g);
+    g.connect(master);
+    o.start(now);
+    o.stop(now+d+.05);
+  });
+
+  const click=c.createOscillator();
+  const clickGain=c.createGain();
+  click.type="triangle";
+  click.frequency.setValueAtTime(2600,now);
+  clickGain.gain.setValueAtTime(.16,now);
+  clickGain.gain.exponentialRampToValueAtTime(.0001,now+.18);
+  click.connect(clickGain);
+  clickGain.connect(master);
+  click.start(now);
+  click.stop(now+.2);
+}
+
 const b=document.getElementById("bellButton");
-b.addEventListener("pointerdown",()=>{
-  ring();
-  b.classList.remove("active");void b.offsetWidth;b.classList.add("active");
+
+b.addEventListener("pointerdown",async(e)=>{
+  e.preventDefault();
+
+  b.classList.remove("active");
+  void b.offsetWidth;
+  b.classList.add("active");
+
   if(navigator.vibrate)navigator.vibrate([25,15,35]);
-});
+
+  try{
+    await ring();
+  }catch(err){
+    console.warn("Áudio bloqueado:",err);
+  }
+},{passive:false});
+
 b.addEventListener("animationend",()=>b.classList.remove("active"));
 </script>
 </body>
