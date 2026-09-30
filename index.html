@@ -1,215 +1,74 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b0b0d" />
-  <title>Bate Sino</title>
-  <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { margin: 0; min-height: 100%; }
-    body {
-      min-height: 100svh;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 42%, #24242a 0%, #111116 42%, #070708 100%);
-      color: #fff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      user-select: none;
-      touch-action: manipulation;
-    }
-    main {
-      width: 100%;
-      min-height: 100svh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 24px;
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(30px, 9vw, 52px);
-      letter-spacing: -0.04em;
-      font-weight: 800;
-    }
-    p {
-      margin: 0 0 42px;
-      color: #a8a8b0;
-      font-size: 15px;
-    }
-    .bell-wrap {
-      position: relative;
-      width: min(76vw, 310px);
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-    }
-    .bell {
-      position: relative;
-      width: 58%;
-      height: 61%;
-      transform-origin: 50% 7%;
-      filter: drop-shadow(0 25px 28px rgba(0,0,0,.45));
-    }
-    .bell-body {
-      position: absolute;
-      left: 4%;
-      right: 4%;
-      bottom: 9%;
-      height: 75%;
-      border-radius: 50% 50% 18% 18% / 20% 20% 10% 10%;
-      background: linear-gradient(110deg, #777 0%, #ddd 17%, #9b9b9b 37%, #f2f2f2 53%, #777 78%, #c9c9c9 100%);
-      box-shadow: inset -10px -8px 16px rgba(0,0,0,.28), inset 8px 7px 13px rgba(255,255,255,.35);
-    }
-    .bell-rim {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 6%;
-      height: 17%;
-      border-radius: 50%;
-      background: linear-gradient(#e7e7e7, #777);
-      box-shadow: inset 0 4px 6px rgba(255,255,255,.5), 0 5px 8px rgba(0,0,0,.3);
-    }
-    .bell-top {
-      position: absolute;
-      left: 38%;
-      top: 0;
-      width: 24%;
-      height: 18%;
-      border-radius: 50% 50% 30% 30%;
-      background: linear-gradient(110deg, #777, #eee 45%, #777);
-    }
-    .bell-knob {
-      position: absolute;
-      left: 42%;
-      top: -5%;
-      width: 16%;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #fff, #999 55%, #555);
-    }
-    .clapper {
-      position: absolute;
-      left: 42%;
-      bottom: 1%;
-      width: 16%;
-      height: 25%;
-      border-radius: 45%;
-      background: linear-gradient(90deg, #555, #ddd 45%, #666);
-    }
-    .bell-wrap::after {
-      content: "";
-      position: absolute;
-      inset: 4%;
-      border-radius: 50%;
-      background: radial-gradient(circle, transparent 42%, rgba(255,255,255,.04) 43%, transparent 44%);
-      pointer-events: none;
-    }
-    .hint {
-      margin-top: 38px;
-      color: #777780;
-      font-size: 13px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-    .bell-wrap.active .bell {
-      animation: ring .55s ease-in-out;
-    }
-    @keyframes ring {
-      0%, 100% { transform: rotate(0deg); }
-      12% { transform: rotate(11deg); }
-      25% { transform: rotate(-10deg); }
-      38% { transform: rotate(8deg); }
-      51% { transform: rotate(-6deg); }
-      64% { transform: rotate(4deg); }
-      77% { transform: rotate(-2deg); }
-    }
-    .flash {
-      position: fixed;
-      inset: 0;
-      background: #fff;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .flash.active { animation: flash .16s ease-out; }
-    @keyframes flash { 0% { opacity: .05; } 100% { opacity: 0; } }
-    @media (prefers-reduced-motion: reduce) {
-      .bell-wrap.active .bell { animation-duration: .25s; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090806">
+<title>Bate Sino</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:#090806}
+body{min-height:100svh;display:grid;place-items:center;overflow:hidden;color:#f5ead0;font-family:system-ui,-apple-system,sans-serif;user-select:none;touch-action:manipulation;background:radial-gradient(circle at 50% 42%,#33291b 0,#15110b 42%,#070605 100%)}
+main{min-height:100svh;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px}
+h1{margin:0 0 7px;font-size:clamp(32px,10vw,54px);letter-spacing:-.045em;font-weight:800}
+p{margin:0 0 38px;color:#ad9b79;font-size:15px}
+.bell-wrap{appearance:none;border:0;background:none;position:relative;width:min(82vw,340px);aspect-ratio:1;display:grid;place-items:center;cursor:pointer;padding:0}
+.bell{position:relative;width:61%;height:64%;transform-origin:50% 8%;filter:drop-shadow(0 28px 25px rgba(0,0,0,.6))}
+.bell-body{position:absolute;left:4%;right:4%;bottom:9%;height:75%;border-radius:50% 50% 18% 18%/20% 20% 10% 10%;background:linear-gradient(105deg,#5d3c12 0%,#a87324 13%,#e1b95d 29%,#80551a 45%,#d6a642 61%,#68430f 78%,#b47b25 92%,#4e310c 100%);box-shadow:inset -12px -10px 18px rgba(38,20,3,.58),inset 10px 8px 16px rgba(255,224,145,.3),inset 0 0 0 2px rgba(255,211,102,.18)}
+.bell-body:after{content:"";position:absolute;left:16%;right:16%;top:24%;height:2px;background:rgba(75,43,8,.45);box-shadow:0 7px 0 rgba(255,216,121,.12)}
+.bell-rim{position:absolute;left:0;right:0;bottom:6%;height:18%;border-radius:50%;background:linear-gradient(#d8ad52 0%,#75480e 45%,#3e2508 100%);box-shadow:inset 0 5px 5px rgba(255,231,160,.38),inset 0 -5px 7px rgba(30,15,2,.55),0 6px 9px rgba(0,0,0,.45)}
+.bell-top{position:absolute;left:37%;top:0;width:26%;height:19%;border-radius:50% 50% 30% 30%;background:linear-gradient(105deg,#6a430e,#e1b958 42%,#825414 72%,#c28b2d);box-shadow:inset 3px 3px 5px rgba(255,229,155,.35)}
+.bell-knob{position:absolute;left:41%;top:-5%;width:18%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 32% 28%,#f4d681,#b67b22 48%,#563609 100%);box-shadow:0 2px 4px rgba(0,0,0,.5)}
+.clapper{position:absolute;left:40%;bottom:0;width:20%;height:26%;border-radius:45%;background:linear-gradient(90deg,#57370a,#d3a33f 45%,#68420c);box-shadow:0 3px 4px rgba(0,0,0,.45)}
+.hint{margin-top:34px;color:#8f7b59;font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.bell-wrap.active .bell{animation:ring .62s cubic-bezier(.36,.07,.19,.97)}
+@keyframes ring{0%,100%{transform:rotate(0)}12%{transform:rotate(13deg)}25%{transform:rotate(-12deg)}38%{transform:rotate(10deg)}51%{transform:rotate(-8deg)}64%{transform:rotate(5deg)}77%{transform:rotate(-3deg)}90%{transform:rotate(1deg)}}
+@media(prefers-reduced-motion:reduce){.bell-wrap.active .bell{animation-duration:.3s}}
+</style>
 </head>
 <body>
-  <main>
-    <h1>Bate Sino</h1>
-    <p>Um toque. Um sino.</p>
-
-    <button class="bell-wrap" id="bellButton" aria-label="Bater o sino">
-      <div class="bell">
-        <div class="bell-knob"></div>
-        <div class="bell-top"></div>
-        <div class="bell-body"></div>
-        <div class="clapper"></div>
-        <div class="bell-rim"></div>
-      </div>
-    </button>
-
-    <div class="hint">Toque no sino</div>
-  </main>
-  <div class="flash" id="flash"></div>
-
-  <script>
-    let audioContext;
-
-    function playBell() {
-      audioContext ??= new (window.AudioContext || window.webkitAudioContext)();
-      if (audioContext.state === "suspended") audioContext.resume();
-
-      const now = audioContext.currentTime;
-      const master = audioContext.createGain();
-      master.gain.setValueAtTime(0.0001, now);
-      master.gain.exponentialRampToValueAtTime(0.5, now + 0.008);
-      master.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
-      master.connect(audioContext.destination);
-
-      // Harmônicos inarmônicos para um timbre de sino metálico.
-      [440, 880, 1320, 1760, 2210].forEach((frequency, i) => {
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        osc.type = i === 0 ? "sine" : "triangle";
-        osc.frequency.setValueAtTime(frequency, now);
-        gain.gain.setValueAtTime(i === 0 ? 0.9 : 0.24 / (i + 0.5), now);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5 + i * 0.15);
-        osc.connect(gain);
-        gain.connect(master);
-        osc.start(now);
-        osc.stop(now + 2.4);
-      });
-    }
-
-    const button = document.getElementById("bellButton");
-    const flash = document.getElementById("flash");
-
-    button.addEventListener("click", () => {
-      playBell();
-
-      button.classList.remove("active");
-      flash.classList.remove("active");
-      void button.offsetWidth;
-      void flash.offsetWidth;
-      button.classList.add("active");
-      flash.classList.add("active");
-
-      if (navigator.vibrate) navigator.vibrate(35);
-    });
-
-    button.addEventListener("animationend", () => {
-      button.classList.remove("active");
-    });
-  </script>
+<main>
+<h1>Bate Sino</h1>
+<p>Um toque. Um sino.</p>
+<button class="bell-wrap" id="bellButton" aria-label="Bater o sino">
+<div class="bell"><div class="bell-knob"></div><div class="bell-top"></div><div class="bell-body"></div><div class="clapper"></div><div class="bell-rim"></div></div>
+</button>
+<div class="hint">Toque no sino</div>
+</main>
+<script>
+let ctx=null;
+function ring(){
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)return;
+  if(!ctx)ctx=new AC();
+  if(ctx.state==="suspended")ctx.resume();
+  const now=ctx.currentTime;
+  const master=ctx.createGain();
+  master.gain.setValueAtTime(.9,now);
+  master.gain.exponentialRampToValueAtTime(.0001,now+2.8);
+  master.connect(ctx.destination);
+  const partials=[[235,.55],[470,.32],[705,.22],[1030,.16],[1410,.12],[1870,.08]];
+  partials.forEach(([f,v],i)=>{
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=i<2?"sine":"triangle";
+    o.frequency.setValueAtTime(f,now);
+    o.frequency.exponentialRampToValueAtTime(f*.985,now+1.8);
+    g.gain.setValueAtTime(v,now);
+    g.gain.exponentialRampToValueAtTime(.0001,now+1.7+i*.18);
+    o.connect(g);g.connect(master);o.start(now);o.stop(now+3);
+  });
+  const noise=ctx.createOscillator(),ng=ctx.createGain();
+  noise.type="triangle";noise.frequency.setValueAtTime(3100,now);
+  ng.gain.setValueAtTime(.07,now);ng.gain.exponentialRampToValueAtTime(.0001,now+.35);
+  noise.connect(ng);ng.connect(master);noise.start(now);noise.stop(now+.4);
+}
+const b=document.getElementById("bellButton");
+b.addEventListener("pointerdown",()=>{
+  ring();
+  b.classList.remove("active");void b.offsetWidth;b.classList.add("active");
+  if(navigator.vibrate)navigator.vibrate([25,15,35]);
+});
+b.addEventListener("animationend",()=>b.classList.remove("active"));
+</script>
 </body>
 </html>
