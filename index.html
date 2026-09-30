@@ -39,7 +39,7 @@ p{margin:0 0 38px;color:#ad9b79;font-size:15px}
 let audio=null;
 
 function makeBellWav(){
-  const sr=44100, duration=3.8, n=Math.floor(sr*duration);
+  const sr=44100, duration=3.4, n=Math.floor(sr*duration);
   const buffer=new ArrayBuffer(44+n*2), view=new DataView(buffer);
   const write=(o,s)=>{for(let i=0;i<s.length;i++)view.setUint8(o+i,s.charCodeAt(i));};
   write(0,"RIFF"); view.setUint32(4,36+n*2,true); write(8,"WAVE");
@@ -48,32 +48,28 @@ function makeBellWav(){
   view.setUint16(32,2,true); view.setUint16(34,16,true); write(36,"data");
   view.setUint32(40,n*2,true);
 
-  const hits=[0,.72,1.44];
+  const hits=[0,.62,1.24];
+  // Pequeno sino de Natal: corpo quente, brilho moderado e bastante ressonância.
   const partials=[
-    [205,1,2.7],[410,.62,2.25],[615,.42,2.0],[820,.28,1.8],
-    [1080,.20,1.55],[1430,.13,1.35],[1810,.09,1.15],[2350,.055,.95],[2920,.035,.75]
+    [196,.95,2.9],[294,.70,2.7],[392,.52,2.5],[588,.32,2.25],
+    [784,.18,2.0],[980,.11,1.8],[1176,.075,1.55],[1568,.045,1.25]
   ];
   const samples=new Float32Array(n);
   let peak=0;
-
   for(let i=0;i<n;i++){
-    const t=i/sr;
-    let x=0;
+    const t=i/sr; let x=0;
     for(const hit of hits){
       const q=t-hit;
       if(q<0)continue;
       for(const [f,a,d] of partials){
         x+=a*Math.exp(-q*d*2.1)*Math.sin(2*Math.PI*f*q);
       }
-      x+=.16*Math.exp(-q*32)*Math.sin(2*Math.PI*3300*q);
-      x+=.10*Math.exp(-q*13)*Math.sin(2*Math.PI*125*q);
+      x+=.09*Math.exp(-q*18)*Math.sin(2*Math.PI*2350*q);
     }
-    samples[i]=x;
-    peak=Math.max(peak,Math.abs(x));
+    samples[i]=x; peak=Math.max(peak,Math.abs(x));
   }
-
   for(let i=0;i<n;i++){
-    let x=samples[i]/peak*.88;
+    let x=samples[i]/peak*.82;
     x=Math.max(-1,Math.min(1,x));
     view.setInt16(44+i*2,x*32767,true);
   }
