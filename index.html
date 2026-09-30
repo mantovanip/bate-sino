@@ -36,80 +36,83 @@ p{margin:0 0 38px;color:#ad9b79;font-size:15px}
 <div class="hint">Toque no sino</div>
 </main>
 <script>
-let ctx=null;
-let unlocking=false;
+let audio=null;
+let audioReady=false;
 
-async function getAudio(){
-  const AC=window.AudioContext||window.webkitAudioContext;
-  if(!AC)return null;
-  if(!ctx)ctx=new AC();
-  if(ctx.state==="suspended")await ctx.resume();
-  return ctx;
+function makeBellWav(){
+  const sr=44100, duration=3;
+  const n=sr*duration;
+  const buffer=new ArrayBuffer(44+n*2);
+  const view=new DataView(buffer);
+  const write=(o,s)=>{for(let i=0;i<s.length;i++)view.setUint8(o+i,s.charCodeAt(i));};
+  write(0,"RIFF");
+  view.setUint32(4,36+n*2,true);
+  write(8,"WAVE");
+  write(12,"fmt ");
+  view.setUint32(16,16,true);
+  view.setUint16(20,1,true);
+  view.setUint16(22,1,true);
+  view.setUint32(24,sr,true);
+  view.setUint32(28,sr*2,true);
+  view.setUint16(32,2,true);
+  view.setUint16(34,16,true);
+  write(36,"data");
+  view.setUint32(40,n*2,true);
+
+  const p=[
+    [196,1,3.0],[393,.62,2.6],[588,.42,2.25],
+    [785,.28,2.0],[1037,.22,1.75],[1375,.15,1.55],
+    [1760,.10,1.35],[2310,.06,1.1],[2940,.04,.9]
+  ];
+
+  let peak=0;
+  const samples=new Float32Array(n);
+  for(let i=0;i<n;i++){
+    const t=i/sr;
+    let s=0;
+    for(const [f,a,d] of p)s+=a*Math.exp(-t*d)*Math.sin(2*Math.PI*f*t);
+    s+=.12*Math.exp(-t*35)*Math.sin(2*Math.PI*3200*t);
+    s+=.10*Math.exp(-t*8)*Math.sin(2*Math.PI*110*t);
+    samples[i]=s;
+    if(Math.abs(s)>peak)peak=Math.abs(s);
+  }
+  for(let i=0;i<n;i++){
+    let s=samples[i]/peak*.9;
+    s=Math.max(-1,Math.min(1,s));
+    view.setInt16(44+i*2,s*32767,true);
+  }
+  return new Blob([buffer],{type:"audio/wav"});
+}
+
+function prepareAudio(){
+  if(audioReady)return;
+  const blob=makeBellWav();
+  audio=new Audio(URL.createObjectURL(blob));
+  audio.preload="auto";
+  audio.setAttribute("playsinline","");
+  audioReady=true;
 }
 
 async function ring(){
-  const c=await getAudio();
-  if(!c)return;
-  const now=c.currentTime;
-
-  const master=c.createGain();
-  master.gain.setValueAtTime(.85,now);
-  master.gain.exponentialRampToValueAtTime(.0001,now+3.2);
-  master.connect(c.destination);
-
-  const partials=[
-    [196,.38,3.0],
-    [392,.28,2.7],
-    [588,.20,2.4],
-    [784,.15,2.2],
-    [1035,.12,1.9],
-    [1375,.09,1.7],
-    [1760,.06,1.45]
-  ];
-
-  partials.forEach(([f,v,d],i)=>{
-    const o=c.createOscillator();
-    const g=c.createGain();
-    o.type=i<4?"sine":"triangle";
-    o.frequency.setValueAtTime(f,now);
-    o.frequency.exponentialRampToValueAtTime(f*.985,now+d);
-    g.gain.setValueAtTime(.0001,now);
-    g.gain.linearRampToValueAtTime(v,now+.012);
-    g.gain.exponentialRampToValueAtTime(.0001,now+d);
-    o.connect(g);
-    g.connect(master);
-    o.start(now);
-    o.stop(now+d+.05);
-  });
-
-  const click=c.createOscillator();
-  const clickGain=c.createGain();
-  click.type="triangle";
-  click.frequency.setValueAtTime(2600,now);
-  clickGain.gain.setValueAtTime(.16,now);
-  clickGain.gain.exponentialRampToValueAtTime(.0001,now+.18);
-  click.connect(clickGain);
-  clickGain.connect(master);
-  click.start(now);
-  click.stop(now+.2);
+  prepareAudio();
+  audio.pause();
+  audio.currentTime=0;
+  try{
+    await audio.play();
+  }catch(e){
+    console.warn("Falha ao reproduzir o sino",e);
+  }
 }
 
 const b=document.getElementById("bellButton");
 
 b.addEventListener("pointerdown",async(e)=>{
   e.preventDefault();
-
   b.classList.remove("active");
   void b.offsetWidth;
   b.classList.add("active");
-
   if(navigator.vibrate)navigator.vibrate([25,15,35]);
-
-  try{
-    await ring();
-  }catch(err){
-    console.warn("Áudio bloqueado:",err);
-  }
+  await ring();
 },{passive:false});
 
 b.addEventListener("animationend",()=>b.classList.remove("active"));
